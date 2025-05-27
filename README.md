@@ -6,7 +6,7 @@ A simple bash script to configure SSH for macOS with proper settings and permiss
 
 - Creates and configures the SSH directory with proper permissions
 - Sets up SSH config with optimized settings
-- Generates SSH keys if they don't exist
+- Generates SSH keys if they don't exist or imports your existing keys
 - Adds the key to ssh-agent
 - Tests connection to GitHub
 - Uses color highlighting for better visibility
@@ -59,6 +59,16 @@ This configuration includes:
 - Optimized connection settings
 - Proper security settings
 
+## Key Management
+
+The script offers two options for SSH key management:
+
+1. **Create a new SSH key**: The script will generate a new RSA key with 4096 bits
+2. **Use an existing SSH key**: You can provide the path to your existing SSH key, and the script will:
+   - Copy it to the correct location
+   - Automatically generate a public key if one doesn't exist
+   - Set proper permissions
+
 ## Security Note
 
-The script will prompt you for an email address to associate with your SSH key. It will never store your private key information in any remote location. 
+The script will prompt you for information as needed. It will never store your private key information in any remote location. 

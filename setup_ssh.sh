@@ -50,26 +50,74 @@ echo -e "${YELLOW}Setting proper permissions for SSH config...${NC}"
 chmod 600 ~/.ssh/config
 echo -e "${GREEN}Permissions set for SSH config${NC}"
 
-# Check if SSH key exists, if not, generate it
+# Check if SSH key exists, if not, give options
 if [ ! -f ~/.ssh/id_rsa_m1 ]; then
-  echo -e "${YELLOW}SSH key id_rsa_m1 not found. Let's create it.${NC}"
-  echo -e "${BLUE}Please enter an email to associate with this SSH key:${NC}"
-  read email
+  echo -e "${YELLOW}SSH key id_rsa_m1 not found.${NC}"
+  echo -e "${BLUE}Choose an option:${NC}"
+  echo -e "  ${GREEN}1)${NC} Create a new SSH key"
+  echo -e "  ${GREEN}2)${NC} Use an existing SSH key"
+  read -p "Enter your choice (1 or 2): " key_choice
   
-  ssh-keygen -t rsa -b 4096 -C "$email" -f ~/.ssh/id_rsa_m1
-  
-  # Set proper permissions for the key files
-  echo -e "${YELLOW}Setting proper permissions for SSH keys...${NC}"
-  chmod 600 ~/.ssh/id_rsa_m1
-  chmod 644 ~/.ssh/id_rsa_m1.pub
-  echo -e "${GREEN}Permissions set for SSH keys${NC}"
-  
-  # Display the public key for the user
-  echo -e "${BLUE}Your public key:${NC}"
-  cat ~/.ssh/id_rsa_m1.pub
-  
-  echo -e "${YELLOW}Add this public key to your GitHub account:${NC}"
-  echo -e "${BLUE}https://github.com/settings/keys${NC}"
+  if [ "$key_choice" = "1" ]; then
+    # Create a new key
+    echo -e "${YELLOW}Creating a new SSH key...${NC}"
+    echo -e "${BLUE}Please enter an email to associate with this SSH key:${NC}"
+    read email
+    
+    ssh-keygen -t rsa -b 4096 -C "$email" -f ~/.ssh/id_rsa_m1
+    
+    # Set proper permissions for the key files
+    echo -e "${YELLOW}Setting proper permissions for SSH keys...${NC}"
+    chmod 600 ~/.ssh/id_rsa_m1
+    chmod 644 ~/.ssh/id_rsa_m1.pub
+    echo -e "${GREEN}Permissions set for SSH keys${NC}"
+    
+    # Display the public key for the user
+    echo -e "${BLUE}Your public key:${NC}"
+    cat ~/.ssh/id_rsa_m1.pub
+    
+    echo -e "${YELLOW}Add this public key to your GitHub account:${NC}"
+    echo -e "${BLUE}https://github.com/settings/keys${NC}"
+  elif [ "$key_choice" = "2" ]; then
+    # Use existing key
+    echo -e "${YELLOW}Using an existing SSH key...${NC}"
+    echo -e "${BLUE}Enter the path to your existing private key:${NC}"
+    read existing_key_path
+    
+    if [ -f "$existing_key_path" ]; then
+      # Copy the existing key
+      cp "$existing_key_path" ~/.ssh/id_rsa_m1
+      
+      # Check if there's a corresponding public key
+      if [ -f "${existing_key_path}.pub" ]; then
+        cp "${existing_key_path}.pub" ~/.ssh/id_rsa_m1.pub
+        echo -e "${GREEN}Both private and public keys copied${NC}"
+      else
+        echo -e "${YELLOW}No corresponding public key found. Generating public key from private key...${NC}"
+        ssh-keygen -y -f ~/.ssh/id_rsa_m1 > ~/.ssh/id_rsa_m1.pub
+        echo -e "${GREEN}Public key generated${NC}"
+      fi
+      
+      # Set proper permissions for the key files
+      echo -e "${YELLOW}Setting proper permissions for SSH keys...${NC}"
+      chmod 600 ~/.ssh/id_rsa_m1
+      chmod 644 ~/.ssh/id_rsa_m1.pub
+      echo -e "${GREEN}Permissions set for SSH keys${NC}"
+      
+      # Display the public key for the user
+      echo -e "${BLUE}Your public key:${NC}"
+      cat ~/.ssh/id_rsa_m1.pub
+      
+      echo -e "${YELLOW}Add this public key to your GitHub account:${NC}"
+      echo -e "${BLUE}https://github.com/settings/keys${NC}"
+    else
+      echo -e "${RED}Error: The specified key file does not exist.${NC}"
+      exit 1
+    fi
+  else
+    echo -e "${RED}Invalid choice. Exiting.${NC}"
+    exit 1
+  fi
 else
   echo -e "${GREEN}SSH key id_rsa_m1 already exists${NC}"
 fi
