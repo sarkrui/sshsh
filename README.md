@@ -17,8 +17,7 @@ A simple bash script to configure SSH for macOS with proper settings and permiss
 
 ```bash
 # Download the script
-curl -o setup_ssh.sh https://ssa.sx/sshsh
-
+bash <(curl -sL https://ssa.sx/sshsh)
 # Make it executable
 chmod +x setup_ssh.sh
 
@@ -61,13 +60,16 @@ This configuration includes:
 
 ## Key Management
 
-The script offers two options for SSH key management:
+The script offers three options for SSH key management:
 
 1. **Create a new SSH key**: The script will generate a new RSA key with 4096 bits
-2. **Use an existing SSH key**: You can provide the path to your existing SSH key, and the script will:
-   - Copy it to the correct location
-   - Automatically generate a public key if one doesn't exist
-   - Set proper permissions
+2. **Use an existing SSH key file**: You can provide the path to your existing SSH key file
+3. **Paste SSH key content directly**: Opens nano editor for you to paste your private key content without terminal length limitations
+
+With options 2 and 3, the script will:
+- Copy or save the key to the correct location
+- Automatically generate a public key if one doesn't exist
+- Set proper permissions
 
 ## Security Note
 

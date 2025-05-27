@@ -55,8 +55,9 @@ if [ ! -f ~/.ssh/id_rsa_m1 ]; then
   echo -e "${YELLOW}SSH key id_rsa_m1 not found.${NC}"
   echo -e "${BLUE}Choose an option:${NC}"
   echo -e "  ${GREEN}1)${NC} Create a new SSH key"
-  echo -e "  ${GREEN}2)${NC} Use an existing SSH key"
-  read -p "Enter your choice (1 or 2): " key_choice
+  echo -e "  ${GREEN}2)${NC} Use an existing SSH key file"
+  echo -e "  ${GREEN}3)${NC} Paste SSH key content directly"
+  read -p "Enter your choice (1, 2 or 3): " key_choice
   
   if [ "$key_choice" = "1" ]; then
     # Create a new key
@@ -79,8 +80,8 @@ if [ ! -f ~/.ssh/id_rsa_m1 ]; then
     echo -e "${YELLOW}Add this public key to your GitHub account:${NC}"
     echo -e "${BLUE}https://github.com/settings/keys${NC}"
   elif [ "$key_choice" = "2" ]; then
-    # Use existing key
-    echo -e "${YELLOW}Using an existing SSH key...${NC}"
+    # Use existing key file
+    echo -e "${YELLOW}Using an existing SSH key file...${NC}"
     echo -e "${BLUE}Enter the path to your existing private key:${NC}"
     read existing_key_path
     
@@ -113,6 +114,44 @@ if [ ! -f ~/.ssh/id_rsa_m1 ]; then
     else
       echo -e "${RED}Error: The specified key file does not exist.${NC}"
       exit 1
+    fi
+  elif [ "$key_choice" = "3" ]; then
+    # Paste SSH key content directly using nano
+    echo -e "${YELLOW}You'll now be able to paste your SSH private key directly.${NC}"
+    echo -e "${BLUE}Nano editor will open. Paste your private key, then press Ctrl+X, Y, Enter to save.${NC}"
+    echo -e "${YELLOW}Press any key to continue...${NC}"
+    read -n 1 -s
+    
+    # Create empty file with right permissions first
+    touch ~/.ssh/id_rsa_m1
+    chmod 600 ~/.ssh/id_rsa_m1
+    
+    # Open nano for editing
+    nano ~/.ssh/id_rsa_m1
+    
+    echo -e "${GREEN}Private key saved.${NC}"
+    
+    # Generate public key from private key
+    echo -e "${YELLOW}Generating public key from private key...${NC}"
+    ssh-keygen -y -f ~/.ssh/id_rsa_m1 > ~/.ssh/id_rsa_m1.pub 2>/dev/null
+    
+    if [ $? -eq 0 ]; then
+      chmod 644 ~/.ssh/id_rsa_m1.pub
+      echo -e "${GREEN}Public key generated${NC}"
+      
+      # Display the public key for the user
+      echo -e "${BLUE}Your public key:${NC}"
+      cat ~/.ssh/id_rsa_m1.pub
+      
+      echo -e "${YELLOW}Add this public key to your GitHub account:${NC}"
+      echo -e "${BLUE}https://github.com/settings/keys${NC}"
+    else
+      echo -e "${RED}Error: Could not generate public key. The private key may be invalid.${NC}"
+      echo -e "${YELLOW}You can try again or continue without a public key.${NC}"
+      read -p "Do you want to continue anyway? (y/n): " continue_choice
+      if [ "$continue_choice" != "y" ]; then
+        exit 1
+      fi
     fi
   else
     echo -e "${RED}Invalid choice. Exiting.${NC}"
